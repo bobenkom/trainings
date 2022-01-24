@@ -1,33 +1,23 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
-def parsing(link):
+def parsing(link: str) -> str:
+    """
+    Parses one page where url == link that contains 50 movies
+    Returns part of future csv file containing info about 50 movies
+    :return str
+    """
     cvs_part = ''
-    name = []
-    country = []
-    genre = []
-    rating = []
     link = urlopen(link)
     bsObj = BeautifulSoup(link, features="html.parser")
     film_name = bsObj.findAll("p", {"class": "selection-film-item-meta__name"})
-    for n in film_name:
-        name.append(n.get_text())
-    film_country = bsObj.findAll("span", {"class": "selection-film-item-meta__meta-additional-item"})
-    temporary = []
-    for i in film_country:
-        temporary.append(i.get_text())
-    for i in range(0, len(temporary)):
-        if i % 2 == 0:
-            country.append(temporary[i])
-        else:
-            genre.append(temporary[i])
+    film_info = bsObj.findAll("span", {"class": "selection-film-item-meta__meta-additional-item"})
     film_rating = bsObj.findAll("span", {"class": "rating__value rating__value_positive"})
-    for r in film_rating:
-        rating.append(r.get_text())
-    for i in range(0, len(name)):
-        cvs_part += name[i] + '; ' + country[i] + '; ' + genre[i] + '; ' + rating[i] + '\n'
+    n = 0
+    for i in range(0, len(film_name)):
+        cvs_part += film_name[i].get_text + '; ' + film_info[n].text + '; ' + film_info[n + 1].text + '; ' + film_rating[i].text + '\n'
+        n += 2  # because film info alternate [country, genre, country, genre...]
     return cvs_part
-
 
 
 def main():
