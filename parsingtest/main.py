@@ -1,6 +1,5 @@
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-import time
 
 def parsing(link: str) -> str:
     """
