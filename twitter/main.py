@@ -24,29 +24,28 @@ def analysis():
     positive = 0
     negative = 0
     for tweet in data:
-        new_tweet = tweet.strip('\n')
-        analysistweet = TextBlob(new_tweet).polarity
-        data_with_analysis.write(f'{new_tweet}, {analysistweet}\n')
+        tweet = tweet.strip('\n')
+        analysistweet = TextBlob(tweet).polarity
+        data_with_analysis.write(f'{tweet}, {analysistweet}\n')
         if analysistweet == 0:
             neutral += 1
         elif analysistweet > 0:
             positive += 1
         else:
             negative += 1
-    sum = neutral + negative + positive
-    result.write(f'Всего было проанализировано {sum} твита(ов).\nИз них {round(neutral / sum * 100, 1)}% твитов нейтральной тональности, {round(positive / sum * 100, 1)}% твитов позитивной и {round(negative / sum * 100, 1)}% негативной тональности')
+    sum_tweets = neutral + negative + positive
+    result.write(f'Всего было проанализировано {sum_tweets} твита(ов).\nИз них {round(neutral / sum_tweets * 100, 1)}% твитов нейтральной тональности, {round(positive / sum_tweets * 100, 1)}% твитов позитивной и {round(negative / sum_tweets * 100, 1)}% негативной тональности')
     data.close()
     data_with_analysis.close()
     result.close()
-    return data_with_analysis, result
 
 def main():
     tweets = Path('tweets.csv')
     if not tweets.is_file():
         my_tweets()
-        analysis()
-    else:
-        analysis()
+    analysis()
+
+
 
 
 if __name__ == '__main__':
