@@ -1,7 +1,7 @@
 from aiogram import types
 
 import telebot
-bot = telebot.TeleBot('2108228280:AAHfspDybJKcHI4_WUkDbzV3hZQs9Ie36v0', parse_mode=types.ParseMode.HTML)
+bot = telebot.TeleBot('token', parse_mode=types.ParseMode.HTML)
 number = 0
 
 def translateENG(message):
@@ -129,12 +129,12 @@ def caesar_decode(message):
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.send_message(message.from_user.id,
-                    "Привет, " + str(message.from_user.first_name) + " \U0001F60A\n" 
+                    "Привет, " + str(message.from_user.first_name) + " \U0001F60A\n"
                                                                 "\nНабрал текст, но забыл переключить раскладку клавиатуры? Нужно расшифровать или отправить секретное сообщение?"
                                                                 " Бот-декодер к твоим услугам!\n"
                                                                 "\n<b>Чтобы им воспользоваться, выбери следующие команды:</b>\n"
-                                                                '\n/keyboardRUS - перевод текста с русской раскладки на английскую раскладку' 
-                                                                '\n/keyboardENG - перевод текста с английской раскладки на русскую раскладку' 
+                                                                '\n/keyboardRUS - перевод текста с русской раскладки на английскую раскладку'
+                                                                '\n/keyboardENG - перевод текста с английской раскладки на русскую раскладку'
                                                                 '\n/Caesar_code - кодирование текста шифром Цезаря'
                                                                 '\n/Caesar_decode - декодирование текста шифром Цезаря'
                                                                 '\n\n<i>Вернуться к выбору команды</i> /help')
@@ -142,3 +142,4 @@ def send_welcome(message):
 
 if __name__ == '__main__':
      bot.infinity_polling()
+
