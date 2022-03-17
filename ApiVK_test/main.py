@@ -1,14 +1,3 @@
-# VK API DOCS:
-# https://vk.com/dev/methods
-
-# How to get auth code:
-# https://oauth.vk.com/authorize?client_id=<YOUR CLIENT ID>&redirect_uri=https://vk.com
-
-# How to get token:
-# https://oauth.vk.com/access_token?client_id=<YOUR CLIENT ID>&client_secret=<YOUR CLIENT SECRET>&redirect_uri=https://vk.com&code=<YOUR AUTH CODE>
-
-# "access_token":"64c63267392def797fe511a31cd9f715c19198b7270ced26d0828a16e81c944837e7121e7672da0d3ebfc"
-
 import requests
 import queries
 import json
@@ -95,7 +84,7 @@ class VkApi:
                 json.dump(r.json()["response"], members)
 
 
-api = VkApi("")
+api = VkApi("token")
 
 
 if __name__ == '__main__':
