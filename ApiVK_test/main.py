@@ -2,30 +2,45 @@ import requests
 import queries
 import json
 import time
+from datetime import datetime
 
 
 class VkApi:
-    api_url = 'https://api.vk.com/method/'
+    api_url = "https://api.vk.com/method/"
     api_version = "5.131"
 
     def __init__(self, api_token):
         self.token = api_token
 
-
-    def get_user_info(self, user_id):
+    def get_user_info(self, user_id: str):
         r = requests.get(self.api_url + "users.get", params={
             "access_token": self.token,
             "v": self.api_version,
-            'user_ids': user_id
+            "user_ids": user_id
         })
         if not r.ok:
             print(f"Error! Got status code: {r.status_code}")
         else:
             return r.json()["response"]
 
-    def search_words(self, query, latitude, longitude):
+    def get_group_info(self, group_ids: str) -> int:
+        r = requests.get(self.api_url + "groups.getById", params={
+            "access_token": self.token,
+            "v": self.api_version,
+            "group_ids": group_ids,
+            "fields": "members_count"
+        })
+        if not r.ok:
+            print(f"Error! Got status code: {r.status_code}")
+        else:
+            return r.json()["response"][0]["members_count"]
+
+    # start_time и end_time принимаются в формате "дд-мм-гггг"
+    def search_key_words(self, query: str, latitude: str, longitude: str, start_time: str, end_time: str) -> json:
         posts = []
         start_from = 0
+        start_time = int(datetime.strptime(start_time, '%d-%m-%Y').timestamp())
+        end_time = int(datetime.strptime(end_time, '%d-%m-%Y').timestamp())
         while len(posts) < 1000:
             r = requests.get(self.api_url + "newsfeed.search", params={
                 "access_token": self.token,
@@ -35,9 +50,8 @@ class VkApi:
                 "latitude": latitude,
                 "longitude": longitude,
                 "start from": start_from,
-                # "start_time": start_time,
-                # "end_time": end_time
-
+                "start_time": start_time,
+                "end_time": end_time
             })
             if not r.ok:
                 print(f"Error! Got status code: {r.status_code}")
@@ -48,55 +62,62 @@ class VkApi:
             batch = r.json()["response"]["items"]
             posts += batch
             time.sleep(1)
-            with open('tags_data.json', 'a') as tags_file:
+            with open('key_words_data.json', 'a') as tags_file:
                 json.dump(batch, tags_file)
                 tags_file.write('\n')
 
+    def wall_search(self, owner_id: int) -> json:
+        publications = []
+        offset = 0
+        while len(publications) < 5000:
+            r = requests.get(self.api_url + "wall.get", params={
+                "access_token": self.token,
+                "v": self.api_version,
+                "owner_id": owner_id,
+                "count": 100,
+                "offset": offset
+            })
+            if not r.ok:
+                print(f"Error! Got status code: {r.status_code}")
+            else:
+                items = r.json()['response']['items']
+                publications += items
+                offset += len(items)
+                time.sleep(0.5)
+        with open('wall.json', 'w') as wall:
+            json.dump(publications, wall)
 
-    def wall_search(self, url, query):
-        r = requests.get(self.api_url + "wall.search", params={
-            "access_token": self.token,
-            "v": self.api_version,
-            "domain": url,
-            'query': query,
-            "count": 100,
-        })
-        if not r.ok:
-            print(f"Error! Got status code: {r.status_code}")
-        else:
-            with open('wall.json', 'w') as wall:
-                json.dump(r.json()["response"], wall)
-
-    def get_members(self, id, query, count):
-        r = requests.get(self.api_url + "wall.search", params={
-            "access_token": self.token,
-            "v": self.api_version,
-            "group_id": id,
-            'query': query,
-            "count": count,
-            'offset': 0,
-            'fields': 'bdate, city, coutry, education, sex, universities'
-        })
-        if not r.ok:
-            print(f"Error! Got status code: {r.status_code}")
-        else:
-            with open('members.json', 'w') as members:
-                json.dump(r.json()["response"], members)
+    def get_members(self, group_id: str, members_count: int) -> json:
+        members = []
+        offset = 0
+        while len(members) < members_count:
+            r = requests.get(self.api_url + "groups.getMembers", params={
+                "access_token": self.token,
+                "v": self.api_version,
+                "group_id": group_id,
+                "count": 1000,
+                "offset": offset,
+                "fields": "bdate, city, country, education, sex, universities"
+            })
+            if not r.ok:
+                print(f"Error! Got status code: {r.status_code}")
+            else:
+                items = r.json()['response']['items']
+                members += items
+                offset += len(items)
+                time.sleep(0.5)
+                print(f"{len(members)} из {members_count}")
+        with open("members.json", "w") as members_file:
+            json.dump(members, members_file)
 
 
 api = VkApi("token")
 
-
 if __name__ == '__main__':
-    n = 1
     for name in queries.tags:
-        api.search_words(name, "55.7558", "37.6173") # Москва
-        print(f'сформирован {n} запрос из {len(queries.tags)}')
-        n += 1
+        api.search_key_words(name, "55.7558", "37.6173", "24-02-2022", "03-03-2022")    # Москва
+        print(f'сформирован {queries.tags.index(name) + 1} запрос из {len(queries.tags)}')
 
+    api.wall_search(-15755094)  # Страница РИА-Новости
 
-    # api.wall_search()
-    # api.get_members()
-
-
-
+    api.get_members("rt_international", api.get_group_info("rt_international"))     # Страница RT
