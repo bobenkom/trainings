@@ -117,13 +117,13 @@ class VkApi:
             json.dump(members, members_file)
 
 
-api = VkApi('b80a78da11fb3ead6df2f60160423849f4aa9a78f5fb3bb4c89e1591d5e218849c4c060e7eb083e4b3ae2')
+api = VkApi(TOKEN)
 
 if __name__ == '__main__':
     for name in queries.tags:
         api.search_key_words(name, "55.7558", "37.6173", "24-02-2022", "03-03-2022")    # Москва
         print(f'сформирован {queries.tags.index(name) + 1} запрос из {len(queries.tags)}')
 
-    # api.wall_search(RIA_NEWS_PAGE_ID)
+    api.wall_search(RIA_NEWS_PAGE_ID)
 
-    # api.get_members("rt_international", api.get_group_info("rt_international"))     # Страница RT
+    api.get_members("rt_international", api.get_group_info("rt_international"))     # Страница RT
